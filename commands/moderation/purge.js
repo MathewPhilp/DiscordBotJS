@@ -1,4 +1,4 @@
-const { SlashCommandBuilder } = require('discord.js');
+const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
 const config = require('../../config.json');
 
 module.exports = {
@@ -8,7 +8,9 @@ module.exports = {
     .addIntegerOption(option =>
       option.setName('amount')
         .setDescription('Number of messages to delete')
-        .setRequired(true)),
+        .setRequired(true))
+        .setDefaultMemberPermissions(PermissionFlagsBits.KickMembers)
+        .setDMPermission(false),
   category: 'moderation',
   requiredRole: config.officerRoleId,
   async execute(interaction) {

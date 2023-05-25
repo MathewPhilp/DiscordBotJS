@@ -1,11 +1,13 @@
-const { SlashCommandBuilder } = require('discord.js');
+const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
 const config = '../../config.json';
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('summon')
-    .setDescription('Move online users with the Raider role to a voice channel.'),
-  category: 'moderation',
+    .setDescription('Move online users with the Raider role to a voice channel.')
+    .setDefaultMemberPermissions(PermissionFlagsBits.KickMembers)
+	  .setDMPermission(false),
+    category: 'moderation',
   async execute(interaction) {
     // Get the target voice channel ID where the users will be moved
     const targetVoiceChannelId = config.raidChannel;
