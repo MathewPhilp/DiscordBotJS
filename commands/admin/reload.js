@@ -10,6 +10,7 @@ module.exports = {
 				.setRequired(true))
 				.setDefaultMemberPermissions('0')
 				.setDMPermission(false),
+				category: 'admin',
 	async execute(interaction) {
 		const commandName = interaction.options.getString('command', true).toLowerCase();
 		const command = interaction.client.commands.get(commandName);
