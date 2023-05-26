@@ -1,15 +1,20 @@
-const axios = require('axios');
 const { SlashCommandBuilder } = require('discord.js');
+const axios = require('axios');
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('lookup')
+    .setDescription('Look up a character on World of Warcraft.')
+    .addSubcommand((subcommand) =>
+    subcommand
+    .setName('character')
     .setDescription('Look up a character on World of Warcraft.')
     .addStringOption((option) =>
       option.setName('name').setDescription('The name of the player.').setRequired(true)
     )
     .addStringOption((option) =>
       option.setName('realm').setDescription('The realm of the player.').setRequired(true)
+    )
     ),
   category: 'wow',
   async execute(interaction) {
@@ -71,9 +76,10 @@ module.exports = {
         userRole = 'Tank';
       }
 
+      const raiderIoLink = `https://raider.io/characters/us/${playerRealm}/${playerName}`;
       const wowArmoryLink = `https://worldofwarcraft.com/en-us/character/us/${playerRealm}/${capitalizedPlayerName}`;
       const warcraftLogsLink = `https://www.warcraftlogs.com/character/us/${playerRealm}/${playerName}`;
-      const raiderIoLink = `https://raider.io/characters/us/${playerRealm}/${playerName}`;
+      
       const wowProgressLink = `https://www.wowprogress.com/character/us/${playerRealm}/${playerName}`;
 
       const gearEmbed = {
@@ -101,7 +107,7 @@ module.exports = {
             value: `**Race:** ${userRace}\n**Class:** ${userClass}\n**Spec:** ${userSpec}\n**Role:** ${userRole}\n**Faction:** ${userFaction}`,
           },
           {
-            name: 'Useful Links',
+            name: '__External Links__',
             value: `[WoWArmory](${wowArmoryLink}) | [RaiderIO](${raiderIoLink}) | [WoWProgress](${wowProgressLink}) | [Warcraft Logs](${warcraftLogsLink}) `,
           },
         ],

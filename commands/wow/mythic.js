@@ -3,13 +3,18 @@ const axios = require('axios');
 
 module.exports = {
   data: new SlashCommandBuilder()
-    .setName('mythicscore')
+    .setName('mythic')
     .setDescription('Look up a character on World of Warcraft.')
-    .addStringOption((option) =>
-      option.setName('name').setDescription('The name of the player.').setRequired(true)
-    )
-    .addStringOption((option) =>
-      option.setName('realm').setDescription('The realm of the player.').setRequired(true)
+    .addSubcommand((subcommand) =>
+      subcommand
+        .setName('score')
+        .setDescription('Get the mythic score of a player.')
+        .addStringOption((option) =>
+          option.setName('name').setDescription('The name of the player.').setRequired(true)
+        )
+        .addStringOption((option) =>
+          option.setName('realm').setDescription('The realm of the player.').setRequired(true)
+        )
     ),
   category: 'wow',
   async execute(interaction) {
@@ -84,8 +89,11 @@ module.exports = {
       } else if (userRole === 'TANK') {
         userRole = 'Tank';
       }
-
       const raiderIoLink = `https://raider.io/characters/us/${playerRealm}/${playerName}`;
+      const wowArmoryLink = `https://worldofwarcraft.com/en-us/character/us/${playerRealm}/${capitalizedPlayerName}`;
+      const warcraftLogsLink = `https://www.warcraftlogs.com/character/us/${playerRealm}/${playerName}`;
+      
+      const wowProgressLink = `https://www.wowprogress.com/character/us/${playerRealm}/${playerName}`;
 
       const gearEmbed = {
         color: 0xC95CF3,
@@ -113,15 +121,16 @@ module.exports = {
             inline: false,
           },
           {
-            name: '__Profile Link__',
-            value: `[RaiderIO](${raiderIoLink})`,
+            name: '__External Links__',
+            value: `[WoWArmory](${wowArmoryLink}) | [RaiderIO](${raiderIoLink}) | [WoWProgress](${wowProgressLink}) | [Warcraft Logs](${warcraftLogsLink})`,
+            inline: false,
           },
         ],
         timestamp: new Date(),
         footer: {
           text: `Requested by ${interaction.user.username}`,
           icon_url: clientAvatar,
-        },
+        }, 
       };
 
       await interaction.reply({ embeds: [gearEmbed] });
