@@ -1,72 +1,60 @@
-const { SlashCommandBuilder } = require('discord.js');
+const { SlashCommandBuilder, ChannelType } = require('discord.js');
 
 module.exports = {
   data: new SlashCommandBuilder()
-    .setName('server')
-    .setDescription("Get server information."),
+    .setName('serverinfo')
+    .setDescription('Get information about the server.'),
   category: 'utility',
   async execute(interaction) {
     const guild = interaction.guild;
-    const guildName = guild.name;
-    const guildIcon = guild.iconURL();
-    const guildOwner = guild.owner ? guild.owner.user.tag : 'Usophie';
-    const guildRegion = guild.region || 'US West';
-    const guildMemberCount = guild.memberCount;
-    const guildCreatedAt = guild.createdAt.toLocaleDateString();
-    const guildVerificationLevel = guild.verificationLevel;
-    const guildBoostLevel = guild.premiumTier;
+    await guild.members.fetch();
+    const owner = guild.members.cache.get(guild.ownerId);
 
-    await interaction.deferReply({ ephemeral: true });
+    const textChannels = guild.channels.cache.filter(c => c.type === 0);
+    const voiceChannels = guild.channels.cache.filter(c => c.type === 2);
+    const roleList = guild.roles.cache
+    .sort((a, b) => b.position - a.position) // Sort roles by position in descending order
+    .map(role => role.name)
+    .join(', ');
+    const members = guild.memberCount;
+    const roles = guild.roles.cache.size;
+    const serverId = guild.id;
+    const serverCreationDate = guild.createdAt.toLocaleString('en-US', {
+      month: '2-digit',
+      day: '2-digit',
+      year: 'numeric',
+      hour: 'numeric',
+      minute: 'numeric',
+      hour12: true,
+    });
 
-    const clientAvatar = interaction.user.displayAvatarURL();
-
-    const excludedRoles = ['Bot', 'Dyno', 'wowaudit', 'Raid Leader'];
-    const includedRoles = ['Administrator', 'Officer', 'Server Booster', 'Raider', 'Trails', 'Community', 'Member', 'New Member'];
-
-    const roleCounts = guild.roles.cache
-      .filter(role => includedRoles.includes(role.name) && !excludedRoles.includes(role.name))
-      .map(role => ({
-        name: role.name,
-        memberCount: role.members.size,
-      }));
+    const botAvatar = interaction.client.user.displayAvatarURL();
 
     const exampleEmbed = {
       color: 0xC95CF3,
-      title: 'Server Information',
       url: 'https://discord.js.org/',
       author: {
-        name: guildName,
-        icon_url: guildIcon,
+        name: 'Where Loot',
+        icon_url: botAvatar,
+        url: 'https://discord.js.org',
       },
       thumbnail: {
-        url: guildIcon,
+        url: botAvatar,
       },
       fields: [
-        { name: 'Owner', value: guildOwner, inline: true },
-        { name: 'Region', value: guildRegion, inline: true },
-        { name: 'Member Count', value: guildMemberCount, inline: true },
-        { name: 'Created At', value: guildCreatedAt, inline: true },
-        { name: 'Verification Level', value: guildVerificationLevel, inline: true },
-        { name: 'Boost Level', value: guildBoostLevel, inline: true },
+        { name: 'Owner', value: owner.user.tag, inline: true },
+        { name: 'Category Channels', value: '7', inline: true },
+        { name: 'Text Channels', value: textChannels.size, inline: true },
+        { name: 'Voice Channels', value: voiceChannels.size, inline: true },
+        { name: 'Members', value: members, inline: true },
+        { name: 'Roles', value: roles, inline: true },
+        { name: 'Role List', value: roleList, inline: false },
       ],
-      image: {
-        url: 'https://i.imgur.com/MLzpRES.png',
-      },
-      timestamp: new Date(),
       footer: {
-        text: `Requested by ${interaction.user.username}`,
-        icon_url: clientAvatar,
+        text: `ID: ${serverId} | Server Created • ${serverCreationDate}`,
       },
     };
 
-    if (roleCounts.length > 0) {
-      const roleCountsString = roleCounts
-        .sort((a, b) => includedRoles.indexOf(a.name) - includedRoles.indexOf(b.name))
-        .map(role => `${role.name}`)
-        .join('\n');
-      exampleEmbed.fields.push({ name: 'Server Roles', value: roleCountsString });
-    }
-
-    await interaction.editReply({ content: 'Retrieving server information... Done!', embeds: [exampleEmbed] });
+    await interaction.reply({ embeds: [exampleEmbed] });
   },
 };
